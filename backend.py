@@ -3,9 +3,7 @@ import logging
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from joblib import dump, load
-import string
 import math
-
 
 app = Flask(__name__)
 model = None
@@ -17,9 +15,14 @@ def password_entropy(password):
     return entropy
 
 def extract_features(passwords):
-    return [[len(p), sum(c.isdigit() for c in p), sum(c.isupper() for c in p), 
-             sum(c.islower() for c in p), sum(c in string.punctuation for c in p), 
-             password_entropy(p)] for p in passwords]
+    return [
+        [
+            len(p), 
+            sum(c.isdigit() for c in p), 
+            sum(c.isupper() for c in p), 
+            sum(c.islower() for c in p)
+        ] for p in passwords
+    ]
 
 def find_common_patterns(passwords, threshold=0.0001):
     substrings = {}
@@ -33,7 +36,13 @@ def find_common_patterns(passwords, threshold=0.0001):
     return [substr for substr, count in substrings.items() if count / total >= threshold]
 
 def is_strong(password, common_patterns):
+    has_upper = any(c.isupper() for c in password)
+    has_lower = any(c.islower() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    
     if len(password) < 8 or password_entropy(password) < 3:
+        return False
+    if not (has_upper and has_lower and has_digit):
         return False
     if any(pattern in password.lower() for pattern in common_patterns):
         return False  # Classify as weak if any common pattern is found

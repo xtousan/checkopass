@@ -5,7 +5,6 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    password = None
     result = None
     error = None
     password_visible = 'text'  # Default state is visible
@@ -20,8 +19,9 @@ def index():
                 result = response.json()['strength']
             else:
                 error = "Error connecting to the backend."
+            return render_template('index.html', password=password, result=result, error=error, password_visible=password_visible)
 
-    return render_template('index.html', password=password, result=result, error=error, password_visible=password_visible)
+    return render_template('index.html', password='', result=result, error=error, password_visible=password_visible)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=False)
